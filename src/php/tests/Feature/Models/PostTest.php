@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\DataBase\Eloquent\Collection;
 use Tests\TestCase;
 
 class PostTest extends TestCase
@@ -17,6 +18,13 @@ class PostTest extends TestCase
         $post = Post::factory()->create();
 
         $this->assertInstanceOf(User::class,$post->user);
+    }
+
+    public function test_commentsリレーションが返る()
+    {
+        $post = Post::factory()->create();
+
+        $this->assertInstanceOf(Collection::class ,$post->comments);
     }
 
 }
