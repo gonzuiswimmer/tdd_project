@@ -9,7 +9,7 @@ use App\Models\Post;
 use App\Models\User;
 use Tests\TestCase;
 
-class PostListControllerTest extends TestCase
+class PostControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -38,5 +38,32 @@ class PostListControllerTest extends TestCase
             '(4件のコメント)',
             '(3件のコメント)',
         ]);
+    }
+
+    public function test_詳細画面が表示される(){
+        $post = Post::factory()->create();
+        $this->get('posts/'.$post->id)
+        ->assertOk()
+        ->assertSee($post->title)
+        ->assertSee($post->user->name);
+    }
+
+    public function test_非公開のブログは詳細画面が表示されない(){
+        $post = Post::factory()->closed()->create();
+        $this->get('posts/'.$post->id)
+        ->assertForbidden();
+    }
+
+    public function test_公開済みのブログのみ一覧表示される(){
+        $post1 = Post::factory()->create([
+            'title' => 'これは公開済みのブログです',
+        ]);
+        $post2 = Post::factory()->closed()->create([
+            'title' => 'これは非公開のブログです',
+        ]);
+
+        $this->get('/')
+        ->assertDontSee('これは非公開のブログです')
+        ->assertSee('これは公開済みのブログです');
     }
 }

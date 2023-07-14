@@ -27,4 +27,23 @@ class PostTest extends TestCase
         $this->assertInstanceOf(Collection::class ,$post->comments);
     }
 
+    public function test_scopeOnlyOpenのテスト()
+    {
+        $post1 = Post::factory()->create();
+        $post2 = Post::factory()->closed()->create();
+
+        $posts = Post::onlyOpen()->get();
+
+        $this->assertTrue($posts->contains($post1));
+        $this->assertFalse($posts->contains($post2));
+    }
+
+    public function test_isClosedのテスト(){
+        $openPost = Post::factory()->make();
+        $closedPost = Post::factory()->closed()->make();
+
+        $this->assertFalse($openPost->isClosed());
+        $this->assertTrue($closedPost->isClosed());
+    }
+
 }

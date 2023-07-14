@@ -10,6 +10,8 @@ use App\Models\Comment;
 class Post extends Model
 {
     use HasFactory;
+    const OPEN = 1;
+    const CLOSED = 0;
 
     public function user(){
         return $this->belongsTo(User::class);
@@ -17,5 +19,13 @@ class Post extends Model
 
     public function comments(){
         return $this->hasMany(Comment::class);
+    }
+
+    public function scopeOnlyOpen($query){
+        $query->where('status',self::OPEN);
+    }
+
+    public function isClosed(){
+        return $this->status == self::CLOSED;
     }
 }
