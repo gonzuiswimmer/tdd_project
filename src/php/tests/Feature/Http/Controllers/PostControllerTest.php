@@ -49,6 +49,21 @@ class PostControllerTest extends TestCase
         ->assertSee($post->user->name);
     }
 
+    public function test_詳細画面が表示され、コメントが古い順に表示される(){
+        $post = Post::factory()->create();
+        [$comment1,$comment2,$comment3] = Comment::factory()->createMany([
+            ['name' => 'firstCommentator','created_at' => now()->sub('5 days'),'post_id' => $post->id,],
+            ['name' => 'secondCommentator','created_at' => now()->sub('3 days'),'post_id' => $post->id,],
+            ['name' => 'thirdCommentator','created_at' => now()->sub('1 days'),'post_id' => $post->id,],
+        ]);
+       
+        $this->get('posts/'.$post->id)
+        ->assertOk()
+        ->assertSee($post->title)
+        ->assertSee($post->user->name)
+        ->assertSeeInOrder(['firstCommentator','secondCommentator','thirdCommentator']);
+    }
+
     public function test_非公開のブログは詳細画面が表示されない(){
         $post = Post::factory()->closed()->create();
         $this->get('posts/'.$post->id)
