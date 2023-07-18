@@ -14,7 +14,9 @@ class SignUpController extends Controller
 
     public function store(Request $request){
         $request->validate([
-            'name' => 'required|max:25'
+            'name' => 'required|max:25',
+            'email' => 'required|email:filter|unique:users,email',
+            'password' => 'required|min:8',
             ]
         );
         User::create([
