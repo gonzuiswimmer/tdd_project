@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Http\Controllers;
 
-use App\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Carbon;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use Tests\TestCase;
@@ -48,6 +49,21 @@ class PostControllerTest extends TestCase
         ->assertSee($post->user->name);
     }
 
+    public function test_詳細画面が表示され、コメントが古い順に表示される(){
+        $post = Post::factory()->create();
+        [$comment1,$comment2,$comment3] = Comment::factory()->createMany([
+            ['name' => 'firstCommentator','created_at' => now()->sub('5 days'),'post_id' => $post->id,],
+            ['name' => 'secondCommentator','created_at' => now()->sub('3 days'),'post_id' => $post->id,],
+            ['name' => 'thirdCommentator','created_at' => now()->sub('1 days'),'post_id' => $post->id,],
+        ]);
+       
+        $this->get('posts/'.$post->id)
+        ->assertOk()
+        ->assertSee($post->title)
+        ->assertSee($post->user->name)
+        ->assertSeeInOrder(['firstCommentator','secondCommentator','thirdCommentator']);
+    }
+
     public function test_非公開のブログは詳細画面が表示されない(){
         $post = Post::factory()->closed()->create();
         $this->get('posts/'.$post->id)
@@ -65,5 +81,25 @@ class PostControllerTest extends TestCase
         $this->get('/')
         ->assertDontSee('これは非公開のブログです')
         ->assertSee('これは公開済みのブログです');
+    }
+
+    public function test_今日が12月25日だとメリークリスマスと表示される(){
+        $post = Post::factory()->create();
+
+        Carbon::setTestNow('2023-12-25');
+
+        $this->get('posts/'.$post->id)
+        ->assertOk()
+        ->assertSee('メリークリスマス！');
+    }
+
+    public function test_今日が12月24日だとメリークリスマスと表示されない(){
+        $post = Post::factory()->create();
+
+        Carbon::setTestNow('2023-12-24');
+
+        $this->get('posts/'.$post->id)
+        ->assertOk()
+        ->assertDontSee('メリークリスマス！');
     }
 }
