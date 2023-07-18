@@ -11,7 +11,12 @@ class SignUpController extends Controller
     public function index(){
         return view('signup');
     }
+
     public function store(Request $request){
+        $request->validate([
+            'name' => 'required|max:25'
+            ]
+        );
         User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
