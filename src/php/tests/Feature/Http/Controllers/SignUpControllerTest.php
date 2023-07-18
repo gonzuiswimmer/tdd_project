@@ -22,15 +22,18 @@ class SignUpControllerTest extends TestCase
             'email' => 'aaa@example.com',
             'password' => 'hogehoge',
         ];
-        $this->post('/signup',$validData)->assertOk();
 
+        // ユーザー情報を持たせて/signupにpostすると指定のページにリダイレクトされる
+        $this->post('/signup',$validData)->assertRedirect('/mypage/posts');
+
+        // 作成したユーザーのパスワードはハッシュ化されてDBに保存されている
         unset($validData['password']);
-
         $this->assertDatabaseHas('users',$validData);
-
         $user = User::firstWhere($validData);
-
         $this->assertTrue(Hash::check('hogehoge', $user->password));
+
+        // 作成したユーザーはログイン状態である
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_不正なデータではユーザー登録ができない(){
@@ -38,7 +41,7 @@ class SignUpControllerTest extends TestCase
         $user = User::factory()->create();
 
         // パラメータがない場合のチェック
-        $this->post($url,[])->assertRedirect();
+        $this->from('/signup')->post($url,[])->assertRedirect('/signup');
 
         // nameのチェック
         $this->post($url,['name' => ''])->assertInvalid(['name'=>'指定']); // $this->post($url,['name' => ''])->assertSessionHasErrors(['name'=>'nameは必ず指定してください。']);
