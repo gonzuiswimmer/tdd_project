@@ -4,7 +4,9 @@ namespace Tests\Feature\Http\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use app\Models\User;
 
 class SignUpControllerTest extends TestCase
 {
@@ -25,5 +27,9 @@ class SignUpControllerTest extends TestCase
         unset($validData['password']);
 
         $this->assertDatabaseHas('users',$validData);
+
+        $user = User::firstWhere($validData);
+
+        $this->assertTrue(Hash::check('hogehoge', $user->password));
     }
 }
